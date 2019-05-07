@@ -1,4 +1,5 @@
-from urllib.request import urlopen
+import requests
+from bs4 import BeautifulSoup
 import os
 links = ''
 
@@ -7,8 +8,16 @@ def telscrawl(name, rstart, rend):
     global links
     for i in range(rstart, rend + 1):
         wpage = 'https://telegram.me/' + name + '/' + str(i)
-        html = urlopen(wpage).read().decode("utf-8")
-        if html.find('View Post') == -1:
+        html = requests.get("https://translate.google.com/translate?anno=2&depth=1&rurl=translate.google.com&sl=nl&sp=nmt4&u=" + wpage).text
+        soup = BeautifulSoup(html, 'html.parser')
+        ifr = soup.find_all('iframe')[0]['src']
+        soup = BeautifulSoup(html, 'html.parser')
+        ifr = soup.find_all('iframe')[0]['src'] 
+        ifr = requests.get(ifr).text
+        ifr = BeautifulSoup(ifr, 'html.parser').find('meta', attrs={'http-equiv': 'refresh'})
+        ifr = ifr['content'].partition('=')[2]
+        pgcon = requests.get(ifr).text
+        if pgcon.find('view post') == -1:
             print(wpage)
             links += wpage + os.linesep
 
